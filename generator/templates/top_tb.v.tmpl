@@ -1,0 +1,24 @@
+`timescale 1ns / 1ps
+
+module top_tb;
+    reg clk;
+    wire led;
+
+    top uut(
+        .clk(clk),
+        .led(led)
+    );
+
+    initial begin
+        clk = 0;
+        forever #18.5 clk = ~clk; // 27 MHz period
+    end
+
+    initial begin
+        $dumpfile("top_tb.vcd");
+        $dumpvars(0, top_tb);
+
+        #50000000  // let it blink for a bit
+        $finish;
+    end
+endmodule

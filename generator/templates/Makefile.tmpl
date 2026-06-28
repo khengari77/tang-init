@@ -1,0 +1,22 @@
+BOARD = {{.ID}}
+FAMILY = {{.FamilyString}}
+DEVICE = {{.DeviceString}}
+PROJ = {{.ProjectName}}
+
+all: build/$(PROJ).fs
+
+build/$(PROJ).json: src/top.v
+	mkdir -p build
+	yosys -p "read_verilog src/top.v; synth_gowin -top top -json build/$(PROJ).json"
+
+build/$(PROJ)_pnr.json: build/$(PROJ).json constraints/board.cst
+	nextpnr-himbaechel --json build/$(PROJ).json --write build/$(PROJ)_pnr.json --device $(DEVICE) --vopt family=$(FAMILY) --vopt cst=constraints/board.cst
+
+build/$(PROJ).fs: build/$(PROJ)_pnr.json
+	gowin_pack -d $(FAMILY) -o build/$(PROJ).fs build/$(PROJ)_pnr.json
+
+flash: build/$(PROJ).fs
+	openFPGALoader -b $(BOARD) build/$(PROJ).fs
+
+clean:
+	rm -rf build/

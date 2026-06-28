@@ -1,0 +1,19 @@
+// --- System Clock ---
+IO_LOC "clk" {{.ClockPin}};
+IO_PORT "clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+
+// --- LEDs ---
+IO_LOC "led" {{index .LEDPins 0}};
+IO_PORT "led" IO_TYPE=LVCMOS33;
+{{range $i, $pin := .LEDPins}}
+{{- if gt $i 0}}
+// IO_LOC "led{{add $i 1}}" {{$pin}};
+// IO_PORT "led{{add $i 1}}" IO_TYPE=LVCMOS33;
+{{- end}}
+{{- end}}
+
+// --- Buttons ---
+{{range $i, $pin := .ButtonPins}}
+// IO_LOC "btn{{add $i 1}}" {{$pin}};
+// IO_PORT "btn{{add $i 1}}" IO_TYPE=LVCMOS33;
+{{- end}}
