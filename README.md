@@ -27,10 +27,13 @@ Then `cd <project_name> && make flash` compiles and loads onto your board.
 
 ## Supported Boards
 
-| Board         | Chip     | Clock | LEDs |
-|---------------|----------|-------|------|
-| Tang Nano 9K  | GW1N-9C  | Pin 52| 6    |
-| Tang Nano 20K | GW2A-18C | Pin 4 | 6    |
+| Board                | Chip        | Clock   | Freq   | LEDs |
+|----------------------|-------------|---------|--------|------|
+| Tang Nano (original) | GW1N-1      | Pin 35  | 24 MHz | RGB  |
+| Tang Nano 1K         | GW1NZ-1     | Pin 47  | 27 MHz | RGB  |
+| Tang Nano 4K         | GW1NSR-4C   | Pin 45  | 27 MHz | 1    |
+| Tang Nano 9K         | GW1NR-9C    | Pin 52  | 27 MHz | 6    |
+| Tang Nano 20K        | GW2A-18C    | Pin 4   | 27 MHz | 6    |
 
 ## Build from source
 

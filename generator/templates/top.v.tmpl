@@ -2,12 +2,12 @@ module top(
     input clk,
     output led
 );
-    // 27 MHz clock on Tang Nano boards
+    // {{.ClockFreq}} Hz clock
     reg [24:0] counter;
     reg led_state;
 
     always @(posedge clk) begin
-        if (counter == 27_000_000 - 1) begin
+        if (counter == {{.ClockFreq}} - 1) begin
             counter <= 0;
             led_state <= ~led_state;
         end else begin
