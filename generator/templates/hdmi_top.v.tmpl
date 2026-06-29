@@ -1,0 +1,26 @@
+module top(
+    input clk,
+    output tmds_clk_p,
+    output [2:0] tmds_d_p
+);
+
+    // ==============================================================
+    // HDMI BOILERPLATE
+    // ==============================================================
+    // To output video you need a TMDS encoder, a PLL to multiply
+    // your 27 MHz clock, and an OSERDES to serialize the data.
+    //
+    // The open-source community has already written this for you:
+    //   - Lushay Labs' hdmi.v
+    //   - Sipeed's svo_hdmi.v
+    //
+    // Next Steps:
+    // 1. Download an open-source HDMI core.
+    // 2. Drop the .v file into your src/ folder.
+    // 3. Instantiate the module here.
+    // ==============================================================
+
+    assign tmds_clk_p = clk;
+    assign tmds_d_p = 3'b101;
+
+endmodule

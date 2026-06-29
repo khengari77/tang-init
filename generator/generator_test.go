@@ -14,7 +14,7 @@ func TestGenerate(t *testing.T) {
 	defer os.Chdir(origDir)
 
 	board := profiles.All()[0]
-	err := Generate("my_blinky", board)
+	err := Generate("my_blinky", "blinky", board)
 	if err != nil {
 		t.Fatal(err)
 	}

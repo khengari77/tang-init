@@ -1,5 +1,12 @@
 package profiles
 
+type HDMIPins struct {
+	ClkP int
+	D0P  int
+	D1P  int
+	D2P  int
+}
+
 type BoardProfile struct {
 	ID           string
 	Name         string
@@ -9,6 +16,8 @@ type BoardProfile struct {
 	ClockFreq    int
 	LEDPins      []int
 	ButtonPins   []int
+	HasHDMI      bool
+	HDMIPins     HDMIPins
 }
 
 func All() []BoardProfile {
@@ -22,6 +31,7 @@ func All() []BoardProfile {
 			ClockFreq:    24_000_000,
 			LEDPins:      []int{16, 17, 18},
 			ButtonPins:   []int{15},
+			HasHDMI:      false,
 		},
 		{
 			ID:           "tangnano1k",
@@ -32,6 +42,7 @@ func All() []BoardProfile {
 			ClockFreq:    27_000_000,
 			LEDPins:      []int{9, 11, 10},
 			ButtonPins:   []int{13, 44},
+			HasHDMI:      false,
 		},
 		{
 			ID:           "tangnano4k",
@@ -42,6 +53,8 @@ func All() []BoardProfile {
 			ClockFreq:    27_000_000,
 			LEDPins:      []int{10},
 			ButtonPins:   []int{14, 15},
+			HasHDMI:      true,
+			HDMIPins:     HDMIPins{ClkP: 28, D0P: 30, D1P: 32, D2P: 35},
 		},
 		{
 			ID:           "tangnano9k",
@@ -52,6 +65,8 @@ func All() []BoardProfile {
 			ClockFreq:    27_000_000,
 			LEDPins:      []int{10, 11, 13, 14, 16, 38},
 			ButtonPins:   []int{3, 4},
+			HasHDMI:      true,
+			HDMIPins:     HDMIPins{ClkP: 69, D0P: 71, D1P: 73, D2P: 75},
 		},
 		{
 			ID:           "tangnano20k",
@@ -62,6 +77,8 @@ func All() []BoardProfile {
 			ClockFreq:    27_000_000,
 			LEDPins:      []int{15, 16, 17, 18, 19, 20},
 			ButtonPins:   []int{88, 87},
+			HasHDMI:      true,
+			HDMIPins:     HDMIPins{ClkP: 33, D0P: 35, D1P: 37, D2P: 39},
 		},
 	}
 }

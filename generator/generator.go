@@ -13,7 +13,7 @@ import (
 //go:embed templates/*
 var templateFS embed.FS
 
-func Generate(projName string, board profiles.BoardProfile) error {
+func Generate(projName string, projType string, board profiles.BoardProfile) error {
 	dirs := []string{
 		filepath.Join(projName, "constraints"),
 		filepath.Join(projName, "src"),
@@ -29,13 +29,18 @@ func Generate(projName string, board profiles.BoardProfile) error {
 		"add": func(a, b int) int { return a + b },
 	}
 
+	topTmpl := "templates/top.v.tmpl"
+	if projType == "hdmi" {
+		topTmpl = "templates/hdmi_top.v.tmpl"
+	}
+
 	files := []struct {
 		tmpl string
 		dest string
 	}{
 		{tmpl: "templates/Makefile.tmpl", dest: filepath.Join(projName, "Makefile")},
 		{tmpl: "templates/board.cst.tmpl", dest: filepath.Join(projName, "constraints", "board.cst")},
-		{tmpl: "templates/top.v.tmpl", dest: filepath.Join(projName, "src", "top.v")},
+		{tmpl: topTmpl, dest: filepath.Join(projName, "src", "top.v")},
 		{tmpl: "templates/top_tb.v.tmpl", dest: filepath.Join(projName, "tb", "top_tb.v")},
 		{tmpl: "templates/gitignore.tmpl", dest: filepath.Join(projName, ".gitignore")},
 	}
@@ -45,9 +50,11 @@ func Generate(projName string, board profiles.BoardProfile) error {
 	data := struct {
 		profiles.BoardProfile
 		ProjectName string
+		ProjectType string
 	}{
 		BoardProfile: board,
 		ProjectName:  base,
+		ProjectType:  projType,
 	}
 
 	for _, f := range files {

@@ -14,7 +14,8 @@ func main() {
 	boards := profiles.All()
 
 	var projName string
-	var selectedBoard profiles.BoardProfile
+	var boardID string
+	var projType string
 
 	boardOpts := make([]huh.Option[string], len(boards))
 	for i, b := range boards {
@@ -22,8 +23,6 @@ func main() {
 	}
 
 	theme := huh.ThemeCatppuccin()
-
-	boardID := ""
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -50,6 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	var selectedBoard profiles.BoardProfile
 	for _, b := range boards {
 		if b.ID == boardID {
 			selectedBoard = b
@@ -57,8 +57,28 @@ func main() {
 		}
 	}
 
+	projType = "blinky"
+	if selectedBoard.HasHDMI {
+		typeForm := huh.NewForm(
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Select project template").
+					Options(
+						huh.NewOption("Basic Blinky", "blinky"),
+						huh.NewOption("HDMI Video Boilerplate", "hdmi"),
+					).
+					Value(&projType),
+			),
+		).WithTheme(theme)
+
+		if err := typeForm.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
 	fmt.Println("Generating project...")
-	if err := generator.Generate(projName, selectedBoard); err != nil {
+	if err := generator.Generate(projName, projType, selectedBoard); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
