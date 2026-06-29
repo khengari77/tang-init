@@ -2,6 +2,7 @@
 IO_LOC "clk" {{.ClockPin}};
 IO_PORT "clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 
+{{- if eq .ProjectType "blinky"}}
 // --- LEDs ---
 IO_LOC "led" {{index .LEDPins 0}};
 IO_PORT "led" IO_TYPE=LVCMOS33;
@@ -17,15 +18,16 @@ IO_PORT "led" IO_TYPE=LVCMOS33;
 // IO_LOC "btn{{add $i 1}}" {{$pin}};
 // IO_PORT "btn{{add $i 1}}" IO_TYPE=LVCMOS33;
 {{- end}}
+{{- end}}
 {{- if eq .ProjectType "hdmi"}}
 
 // --- HDMI (TMDS) ---
 IO_LOC "tmds_clk_p" {{.HDMIPins.ClkP}};
-IO_PORT "tmds_clk_p" PULL_MODE=NONE DRIVE=8;
+IO_PORT "tmds_clk_p" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
 IO_LOC "tmds_d_p[0]" {{.HDMIPins.D0P}};
-IO_PORT "tmds_d_p[0]" PULL_MODE=NONE DRIVE=8;
+IO_PORT "tmds_d_p[0]" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
 IO_LOC "tmds_d_p[1]" {{.HDMIPins.D1P}};
-IO_PORT "tmds_d_p[1]" PULL_MODE=NONE DRIVE=8;
+IO_PORT "tmds_d_p[1]" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
 IO_LOC "tmds_d_p[2]" {{.HDMIPins.D2P}};
-IO_PORT "tmds_d_p[2]" PULL_MODE=NONE DRIVE=8;
+IO_PORT "tmds_d_p[2]" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
 {{- end}}

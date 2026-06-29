@@ -1,7 +1,9 @@
 module top(
     input clk,               // {{.ClockFreq}} MHz board clock
-    output tmds_clk_p,       // HDMI Clock out
-    output [2:0] tmds_d_p    // HDMI Data out (B, G, R)
+    output tmds_clk_p,       // HDMI Clock out (+)
+    output tmds_clk_n,       // HDMI Clock out (-)
+    output [2:0] tmds_d_p,   // HDMI Data out (+)
+    output [2:0] tmds_d_n    // HDMI Data out (-)
 );
 
     // ==========================================
@@ -97,7 +99,7 @@ module top(
                 .D5(data[5]), .D6(data[6]), .D7(data[7]), .D8(data[8]), .D9(data[9]),
                 .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
             );
-            TLVDS_OBUF tlvds (.O(tmds_d_p[i]), .OB(), .I(tmds_serial[i]));
+            TLVDS_OBUF tlvds (.O(tmds_d_p[i]), .OB(tmds_d_n[i]), .I(tmds_serial[i]));
         end
     endgenerate
 
@@ -108,6 +110,6 @@ module top(
         .D5(1'b1), .D6(1'b1), .D7(1'b1), .D8(1'b1), .D9(1'b1),
         .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
     );
-    TLVDS_OBUF tlvds_clk (.O(tmds_clk_p), .OB(), .I(clk_serial));
+    TLVDS_OBUF tlvds_clk (.O(tmds_clk_p), .OB(tmds_clk_n), .I(clk_serial));
 
 endmodule
