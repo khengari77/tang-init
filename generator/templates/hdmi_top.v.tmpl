@@ -1,12 +1,10 @@
 module top(
     input clk,               // {{.ClockFreq}} MHz board clock
     output tmds_clk_p,       // HDMI Clock out (+)
-    output [2:0] tmds_d_p    // HDMI Data out (+)
+    output tmds_clk_n,       // HDMI Clock out (-)
+    output [2:0] tmds_d_p,   // HDMI Data out (+)
+    output [2:0] tmds_d_n    // HDMI Data out (-)
 );
-
-    // Negative diff pair wires (connected to TLVDS_OBUF .OB, not external ports)
-    wire tmds_clk_n;
-    wire [2:0] tmds_d_n;
 
     // ==========================================
     // 1. Clock Generation (PLL)

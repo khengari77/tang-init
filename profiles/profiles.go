@@ -2,9 +2,26 @@ package profiles
 
 type HDMIPins struct {
 	ClkP int
+	ClkN int
 	D0P  int
+	D0N  int
 	D1P  int
+	D1N  int
 	D2P  int
+	D2N  int
+}
+
+func (p HDMIPins) all() []struct{ name string; pin int } {
+	return []struct{ name string; pin int }{
+		{"tmds_clk_p", p.ClkP},
+		{"tmds_clk_n", p.ClkN},
+		{"tmds_d_p[0]", p.D0P},
+		{"tmds_d_n[0]", p.D0N},
+		{"tmds_d_p[1]", p.D1P},
+		{"tmds_d_n[1]", p.D1N},
+		{"tmds_d_p[2]", p.D2P},
+		{"tmds_d_n[2]", p.D2N},
+	}
 }
 
 type BoardProfile struct {
@@ -54,7 +71,7 @@ func All() []BoardProfile {
 			LEDPins:      []int{10},
 			ButtonPins:   []int{14, 15},
 			HasHDMI:      true,
-			HDMIPins:     HDMIPins{ClkP: 28, D0P: 30, D1P: 32, D2P: 35},
+			HDMIPins:     HDMIPins{ClkP: 28, ClkN: 29, D0P: 30, D0N: 31, D1P: 32, D1N: 33, D2P: 35, D2N: 36},
 		},
 		{
 			ID:           "tangnano9k",
@@ -66,7 +83,7 @@ func All() []BoardProfile {
 			LEDPins:      []int{10, 11, 13, 14, 16, 38},
 			ButtonPins:   []int{3, 4},
 			HasHDMI:      true,
-			HDMIPins:     HDMIPins{ClkP: 69, D0P: 71, D1P: 73, D2P: 75},
+			HDMIPins:     HDMIPins{ClkP: 69, ClkN: 70, D0P: 71, D0N: 72, D1P: 73, D1N: 74, D2P: 75, D2N: 76},
 		},
 		{
 			ID:           "tangnano20k",
@@ -78,7 +95,7 @@ func All() []BoardProfile {
 			LEDPins:      []int{15, 16, 17, 18, 19, 20},
 			ButtonPins:   []int{88, 87},
 			HasHDMI:      true,
-			HDMIPins:     HDMIPins{ClkP: 33, D0P: 35, D1P: 37, D2P: 39},
+			HDMIPins:     HDMIPins{ClkP: 33, ClkN: 34, D0P: 35, D0N: 36, D1P: 37, D1N: 38, D2P: 39, D2N: 40},
 		},
 	}
 }

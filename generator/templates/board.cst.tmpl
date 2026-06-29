@@ -30,4 +30,13 @@ IO_LOC "tmds_d_p[1]" {{.HDMIPins.D1P}};
 IO_PORT "tmds_d_p[1]" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
 IO_LOC "tmds_d_p[2]" {{.HDMIPins.D2P}};
 IO_PORT "tmds_d_p[2]" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33D;
+
+IO_LOC "tmds_clk_n" {{.HDMIPins.ClkN}};
+IO_PORT "tmds_clk_n" IO_TYPE=LVCMOS33D;
+IO_LOC "tmds_d_n[0]" {{.HDMIPins.D0N}};
+IO_PORT "tmds_d_n[0]" IO_TYPE=LVCMOS33D;
+IO_LOC "tmds_d_n[1]" {{.HDMIPins.D1N}};
+IO_PORT "tmds_d_n[1]" IO_TYPE=LVCMOS33D;
+IO_LOC "tmds_d_n[2]" {{.HDMIPins.D2N}};
+IO_PORT "tmds_d_n[2]" IO_TYPE=LVCMOS33D;
 {{- end}}
