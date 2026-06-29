@@ -1,0 +1,76 @@
+// Standard TMDS Encoder
+// Converts 8-bit color data into 10-bit DC-balanced TMDS signals
+
+module tmds_encoder (
+    input  logic clk,
+    input  logic rst,
+    input  logic [7:0] vd,    // video data
+    input  logic [1:0] cd,    // control data
+    input  logic vde,         // video data enable
+    output logic [9:0] tmds
+);
+
+    logic [3:0] n1d;
+    always_comb begin
+        n1d = 0;
+        for (int i=0; i<8; i++) n1d += vd[i];
+    end
+
+    logic use_xnor;
+    always_comb use_xnor = (n1d > 4) || (n1d == 4 && vd[0] == 0);
+
+    logic [8:0] q_m;
+    always_comb begin
+        q_m[0] = vd[0];
+        for (int i=1; i<8; i++) begin
+            q_m[i] = use_xnor ? ~(q_m[i-1] ^ vd[i]) : (q_m[i-1] ^ vd[i]);
+        end
+        q_m[8] = use_xnor ? 0 : 1;
+    end
+
+    logic [3:0] n1q_m, n0q_m;
+    always_comb begin
+        n1q_m = 0;
+        for (int i=0; i<8; i++) n1q_m += q_m[i];
+        n0q_m = 8 - n1q_m;
+    end
+
+    logic [4:0] cnt;
+    logic [9:0] tmds_out;
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            cnt <= 0;
+            tmds_out <= 0;
+        end else if (vde) begin
+            if (cnt == 0 || n1q_m == n0q_m) begin
+                tmds_out[9]   <= ~q_m[8];
+                tmds_out[8]   <= q_m[8];
+                tmds_out[7:0] <= q_m[8] ? q_m[7:0] : ~q_m[7:0];
+                cnt <= q_m[8] ? cnt + n1q_m - n0q_m : cnt + n0q_m - n1q_m;
+            end else begin
+                if ((cnt > 0 && n1q_m > n0q_m) || (cnt < 0 && n0q_m > n1q_m)) begin
+                    tmds_out[9]   <= 1;
+                    tmds_out[8]   <= q_m[8];
+                    tmds_out[7:0] <= ~q_m[7:0];
+                    cnt <= cnt + {1'b0, q_m[8]} - (n1q_m - n0q_m);
+                end else begin
+                    tmds_out[9]   <= 0;
+                    tmds_out[8]   <= q_m[8];
+                    tmds_out[7:0] <= q_m[7:0];
+                    cnt <= cnt - {1'b0, ~q_m[8]} + (n1q_m - n0q_m);
+                end
+            end
+        end else begin
+            cnt <= 0;
+            case (cd)
+                2'b00: tmds_out <= 10'b1101010100;
+                2'b01: tmds_out <= 10'b0010101011;
+                2'b10: tmds_out <= 10'b0101010100;
+                2'b11: tmds_out <= 10'b1010101011;
+            endcase
+        end
+    end
+
+    assign tmds = tmds_out;
+endmodule

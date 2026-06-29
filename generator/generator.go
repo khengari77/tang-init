@@ -27,6 +27,7 @@ func Generate(projName string, projType string, board profiles.BoardProfile) err
 
 	funcMap := template.FuncMap{
 		"add": func(a, b int) int { return a + b },
+		"mul": func(a, b int) int { return a * b },
 	}
 
 	topTmpl := "templates/top.v.tmpl"
@@ -43,6 +44,13 @@ func Generate(projName string, projType string, board profiles.BoardProfile) err
 		{tmpl: topTmpl, dest: filepath.Join(projName, "src", "top.v")},
 		{tmpl: "templates/top_tb.v.tmpl", dest: filepath.Join(projName, "tb", "top_tb.v")},
 		{tmpl: "templates/gitignore.tmpl", dest: filepath.Join(projName, ".gitignore")},
+	}
+
+	if projType == "hdmi" {
+		files = append(files, struct{ tmpl, dest string }{
+			tmpl: "templates/tmds_encoder.sv.tmpl",
+			dest: filepath.Join(projName, "src", "tmds_encoder.sv"),
+		})
 	}
 
 	base := filepath.Base(projName)

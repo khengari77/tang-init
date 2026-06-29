@@ -1,26 +1,113 @@
 module top(
-    input clk,
-    output tmds_clk_p,
-    output [2:0] tmds_d_p
+    input clk,               // {{.ClockFreq}} MHz board clock
+    output tmds_clk_p,       // HDMI Clock out
+    output [2:0] tmds_d_p    // HDMI Data out (B, G, R)
 );
 
-    // ==============================================================
-    // HDMI BOILERPLATE
-    // ==============================================================
-    // To output video you need a TMDS encoder, a PLL to multiply
-    // your 27 MHz clock, and an OSERDES to serialize the data.
-    //
-    // The open-source community has already written this for you:
-    //   - Lushay Labs' hdmi.v
-    //   - Sipeed's svo_hdmi.v
-    //
-    // Next Steps:
-    // 1. Download an open-source HDMI core.
-    // 2. Drop the .v file into your src/ folder.
-    // 3. Instantiate the module here.
-    // ==============================================================
+    // ==========================================
+    // 1. Clock Generation (PLL)
+    // ==========================================
+    // HDMI requires a 5x pixel clock for serialization.
+    // {{.ClockFreq}} MHz * 5 = {{mul .ClockFreq 5}} MHz
+    wire clk_{{mul .ClockFreq 5}}m;
+    wire lock;
+{{if eq .ClockFreq 24}}
+    rPLL #(
+        .FCLKIN("24"),
+        .IDIV_SEL(0),     // Divide by 1
+        .FBDIV_SEL(9),    // Multiply by 10 (VCO = 240 MHz)
+        .ODIV_SEL(1)      // Divide by 2 (240 / 2 = 120 MHz)
+    ) pll_inst (
+        .CLKIN(clk),
+        .CLKOUT(clk_120m),
+        .LOCK(lock),
+        .CLKOUTP(), .CLKOUTD(), .CLKOUTD3(),
+        .RESET(1'b0), .RESET_P(1'b0), .CLKFB(1'b0),
+        .FBDSEL(6'b0), .IDSEL(6'b0), .ODSEL(6'b0),
+        .PSDA(4'b0), .DUTYDA(4'b0), .FDLY(4'b0)
+    );
+{{else}}
+    rPLL #(
+        .FCLKIN("27"),
+        .IDIV_SEL(0),     // Divide by 1
+        .FBDIV_SEL(9),    // Multiply by 10 (VCO = 270 MHz)
+        .ODIV_SEL(1)      // Divide by 2 (270 / 2 = 135 MHz)
+    ) pll_inst (
+        .CLKIN(clk),
+        .CLKOUT(clk_135m),
+        .LOCK(lock),
+        .CLKOUTP(), .CLKOUTD(), .CLKOUTD3(),
+        .RESET(1'b0), .RESET_P(1'b0), .CLKFB(1'b0),
+        .FBDSEL(6'b0), .IDSEL(6'b0), .ODSEL(6'b0),
+        .PSDA(4'b0), .DUTYDA(4'b0), .FDLY(4'b0)
+    );
+{{end}}
+    // ==========================================
+    // 2. Video Timings (720x480 @ 60Hz)
+    // ==========================================
+    reg [9:0] cx = 0; // X position
+    reg [9:0] cy = 0; // Y position
 
-    assign tmds_clk_p = clk;
-    assign tmds_d_p = 3'b101;
+    always @(posedge clk) begin
+        if (cx == 857) begin
+            cx <= 0;
+            if (cy == 524)
+                cy <= 0;
+            else
+                cy <= cy + 1;
+        end else begin
+            cx <= cx + 1;
+        end
+    end
+
+    // CEA-861 blanking logic for 480p
+    wire hsync = (cx >= 720 + 16) && (cx < 720 + 16 + 62);
+    wire vsync = (cy >= 480 + 9)  && (cy < 480 + 9 + 6);
+    wire de    = (cx < 720)       && (cy < 480);
+
+    // ==========================================
+    // 3. The Color
+    // ==========================================
+    // Make the screen RED!
+    wire [7:0] red   = de ? 8'hFF : 8'h00;
+    wire [7:0] green = 8'h00;
+    wire [7:0] blue  = 8'h00;
+
+    // ==========================================
+    // 4. The TMDS Encoders
+    // ==========================================
+    wire [9:0] tmds_r, tmds_g, tmds_b;
+
+    tmds_encoder enc_r(.clk(clk), .rst(~lock), .vd(red),   .cd(2'b00),          .vde(de), .tmds(tmds_r));
+    tmds_encoder enc_g(.clk(clk), .rst(~lock), .vd(green), .cd(2'b00),          .vde(de), .tmds(tmds_g));
+    tmds_encoder enc_b(.clk(clk), .rst(~lock), .vd(blue),  .cd({vsync, hsync}), .vde(de), .tmds(tmds_b));
+
+    // ==========================================
+    // 5. Hardware Serializers (Gowin Primitives)
+    // ==========================================
+    wire [2:0] tmds_serial;
+
+    genvar i;
+    generate
+        for (i = 0; i < 3; i = i + 1) begin : oser_data
+            wire [9:0] data = (i==0) ? tmds_b : (i==1) ? tmds_g : tmds_r;
+            OSER10 oser (
+                .Q(tmds_serial[i]),
+                .D0(data[0]), .D1(data[1]), .D2(data[2]), .D3(data[3]), .D4(data[4]),
+                .D5(data[5]), .D6(data[6]), .D7(data[7]), .D8(data[8]), .D9(data[9]),
+                .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+            );
+            TLVDS_OBUF tlvds (.O(tmds_d_p[i]), .OB(), .I(tmds_serial[i]));
+        end
+    endgenerate
+
+    wire clk_serial;
+    OSER10 oser_clk (
+        .Q(clk_serial),
+        .D0(1'b0), .D1(1'b0), .D2(1'b0), .D3(1'b0), .D4(1'b0),
+        .D5(1'b1), .D6(1'b1), .D7(1'b1), .D8(1'b1), .D9(1'b1),
+        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+    );
+    TLVDS_OBUF tlvds_clk (.O(tmds_clk_p), .OB(), .I(clk_serial));
 
 endmodule
