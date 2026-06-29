@@ -87,29 +87,51 @@ module top(
     // ==========================================
     // 5. Hardware Serializers (Gowin Primitives)
     // ==========================================
+    wire clk_serial;
     wire [2:0] tmds_serial;
 
-    genvar i;
-    generate
-        for (i = 0; i < 3; i = i + 1) begin : oser_data
-            wire [9:0] data = (i==0) ? tmds_b : (i==1) ? tmds_g : tmds_r;
-            OSER10 oser (
-                .Q(tmds_serial[i]),
-                .D0(data[0]), .D1(data[1]), .D2(data[2]), .D3(data[3]), .D4(data[4]),
-                .D5(data[5]), .D6(data[6]), .D7(data[7]), .D8(data[8]), .D9(data[9]),
-                .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
-            );
-            TLVDS_OBUF tlvds (.O(tmds_d_p[i]), .OB(tmds_d_n[i]), .I(tmds_serial[i]));
-        end
-    endgenerate
+    // Blue channel (D2)
+    OSER10 oser_b (
+        .Q(tmds_serial[0]),
+        .D0(tmds_b[0]), .D1(tmds_b[1]), .D2(tmds_b[2]), .D3(tmds_b[3]), .D4(tmds_b[4]),
+        .D5(tmds_b[5]), .D6(tmds_b[6]), .D7(tmds_b[7]), .D8(tmds_b[8]), .D9(tmds_b[9]),
+        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+    );
+    defparam oser_b.GSREN = "false";
+    defparam oser_b.LSREN = "false";
+    TLVDS_OBUF tlvds_b (.O(tmds_d_p[0]), .OB(tmds_d_n[0]), .I(tmds_serial[0]));
 
-    wire clk_serial;
+    // Green channel (D1)
+    OSER10 oser_g (
+        .Q(tmds_serial[1]),
+        .D0(tmds_g[0]), .D1(tmds_g[1]), .D2(tmds_g[2]), .D3(tmds_g[3]), .D4(tmds_g[4]),
+        .D5(tmds_g[5]), .D6(tmds_g[6]), .D7(tmds_g[7]), .D8(tmds_g[8]), .D9(tmds_g[9]),
+        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+    );
+    defparam oser_g.GSREN = "false";
+    defparam oser_g.LSREN = "false";
+    TLVDS_OBUF tlvds_g (.O(tmds_d_p[1]), .OB(tmds_d_n[1]), .I(tmds_serial[1]));
+
+    // Red channel (D0)
+    OSER10 oser_r (
+        .Q(tmds_serial[2]),
+        .D0(tmds_r[0]), .D1(tmds_r[1]), .D2(tmds_r[2]), .D3(tmds_r[3]), .D4(tmds_r[4]),
+        .D5(tmds_r[5]), .D6(tmds_r[6]), .D7(tmds_r[7]), .D8(tmds_r[8]), .D9(tmds_r[9]),
+        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+    );
+    defparam oser_r.GSREN = "false";
+    defparam oser_r.LSREN = "false";
+    TLVDS_OBUF tlvds_r (.O(tmds_d_p[2]), .OB(tmds_d_n[2]), .I(tmds_serial[2]));
+
+    // Clock channel
     OSER10 oser_clk (
         .Q(clk_serial),
         .D0(1'b0), .D1(1'b0), .D2(1'b0), .D3(1'b0), .D4(1'b0),
         .D5(1'b1), .D6(1'b1), .D7(1'b1), .D8(1'b1), .D9(1'b1),
         .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
     );
+    defparam oser_clk.GSREN = "false";
+    defparam oser_clk.LSREN = "false";
     TLVDS_OBUF tlvds_clk (.O(tmds_clk_p), .OB(tmds_clk_n), .I(clk_serial));
 
 endmodule
