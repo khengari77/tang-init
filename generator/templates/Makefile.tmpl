@@ -18,5 +18,8 @@ build/$(PROJ).fs: build/$(PROJ)_pnr.json
 flash: build/$(PROJ).fs
 	openFPGALoader -b $(BOARD) build/$(PROJ).fs
 
+persist: build/$(PROJ).fs
+	openFPGALoader -b $(BOARD) -f build/$(PROJ).fs
+
 clean:
 	rm -rf build/
