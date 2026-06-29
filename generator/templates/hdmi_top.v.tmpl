@@ -17,8 +17,8 @@ module top(
     rPLL #(
         .FCLKIN("24"),
         .IDIV_SEL(0),     // Divide by 1
-        .FBDIV_SEL(9),    // Multiply by 10 (VCO = 240 MHz)
-        .ODIV_SEL(1)      // Divide by 2 (240 / 2 = 120 MHz)
+        .FBDIV_SEL(4),    // Multiply by 5 (VCO = 600 MHz)
+        .ODIV_SEL(5)      // Divide by 5 (600 / 5 = 120 MHz)
     ) pll_inst (
         .CLKIN(clk),
         .CLKOUT(clk_120m),
@@ -32,8 +32,8 @@ module top(
     rPLL #(
         .FCLKIN("27"),
         .IDIV_SEL(0),     // Divide by 1
-        .FBDIV_SEL(9),    // Multiply by 10 (VCO = 270 MHz)
-        .ODIV_SEL(1)      // Divide by 2 (270 / 2 = 135 MHz)
+        .FBDIV_SEL(4),    // Multiply by 5 (VCO = 540 MHz)
+        .ODIV_SEL(4)      // Divide by 4 (540 / 4 = 135 MHz)
     ) pll_inst (
         .CLKIN(clk),
         .CLKOUT(clk_135m),
