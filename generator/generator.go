@@ -28,6 +28,7 @@ func Generate(projName string, projType string, board profiles.BoardProfile) err
 	funcMap := template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"mul": func(a, b int) int { return a * b },
+		"mhz": func(hz int) int { return hz / 1_000_000 },
 	}
 
 	topTmpl := "templates/top.v.tmpl"

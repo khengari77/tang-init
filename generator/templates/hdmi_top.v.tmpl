@@ -1,5 +1,5 @@
 module top(
-    input clk,               // {{.ClockFreq}} MHz board clock
+    input clk,               // {{mhz .ClockFreq}} MHz board clock
     output tmds_clk_p,       // HDMI Clock out (+)
     output tmds_clk_n,       // HDMI Clock out (-)
     output [2:0] tmds_d_p,   // HDMI Data out (+)
@@ -10,10 +10,10 @@ module top(
     // 1. Clock Generation (PLL)
     // ==========================================
     // HDMI requires a 5x pixel clock for serialization.
-    // {{.ClockFreq}} MHz * 5 = {{mul .ClockFreq 5}} MHz
-    wire clk_{{mul .ClockFreq 5}}m;
+    // {{mhz .ClockFreq}} MHz * 5 = {{mul (mhz .ClockFreq) 5}} MHz
+    wire clk_{{mul (mhz .ClockFreq) 5}}m;
     wire lock;
-{{if eq .ClockFreq 24}}
+{{if eq (mhz .ClockFreq) 24}}
     rPLL #(
         .FCLKIN("24"),
         .IDIV_SEL(0),     // Divide by 1
@@ -91,44 +91,48 @@ module top(
     wire [2:0] tmds_serial;
 
     // Blue channel (D2)
+    (* IOLOGIC_FCLK="clk_{{mul (mhz .ClockFreq) 5}}m" *)
     OSER10 oser_b (
         .Q(tmds_serial[0]),
         .D0(tmds_b[0]), .D1(tmds_b[1]), .D2(tmds_b[2]), .D3(tmds_b[3]), .D4(tmds_b[4]),
         .D5(tmds_b[5]), .D6(tmds_b[6]), .D7(tmds_b[7]), .D8(tmds_b[8]), .D9(tmds_b[9]),
-        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+        .PCLK(clk), .FCLK(clk_{{mul (mhz .ClockFreq) 5}}m), .RESET(~lock)
     );
     defparam oser_b.GSREN = "false";
     defparam oser_b.LSREN = "false";
     TLVDS_OBUF tlvds_b (.O(tmds_d_p[0]), .OB(tmds_d_n[0]), .I(tmds_serial[0]));
 
     // Green channel (D1)
+    (* IOLOGIC_FCLK="clk_{{mul (mhz .ClockFreq) 5}}m" *)
     OSER10 oser_g (
         .Q(tmds_serial[1]),
         .D0(tmds_g[0]), .D1(tmds_g[1]), .D2(tmds_g[2]), .D3(tmds_g[3]), .D4(tmds_g[4]),
         .D5(tmds_g[5]), .D6(tmds_g[6]), .D7(tmds_g[7]), .D8(tmds_g[8]), .D9(tmds_g[9]),
-        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+        .PCLK(clk), .FCLK(clk_{{mul (mhz .ClockFreq) 5}}m), .RESET(~lock)
     );
     defparam oser_g.GSREN = "false";
     defparam oser_g.LSREN = "false";
     TLVDS_OBUF tlvds_g (.O(tmds_d_p[1]), .OB(tmds_d_n[1]), .I(tmds_serial[1]));
 
     // Red channel (D0)
+    (* IOLOGIC_FCLK="clk_{{mul (mhz .ClockFreq) 5}}m" *)
     OSER10 oser_r (
         .Q(tmds_serial[2]),
         .D0(tmds_r[0]), .D1(tmds_r[1]), .D2(tmds_r[2]), .D3(tmds_r[3]), .D4(tmds_r[4]),
         .D5(tmds_r[5]), .D6(tmds_r[6]), .D7(tmds_r[7]), .D8(tmds_r[8]), .D9(tmds_r[9]),
-        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+        .PCLK(clk), .FCLK(clk_{{mul (mhz .ClockFreq) 5}}m), .RESET(~lock)
     );
     defparam oser_r.GSREN = "false";
     defparam oser_r.LSREN = "false";
     TLVDS_OBUF tlvds_r (.O(tmds_d_p[2]), .OB(tmds_d_n[2]), .I(tmds_serial[2]));
 
     // Clock channel
+    (* IOLOGIC_FCLK="clk_{{mul (mhz .ClockFreq) 5}}m" *)
     OSER10 oser_clk (
         .Q(clk_serial),
         .D0(1'b0), .D1(1'b0), .D2(1'b0), .D3(1'b0), .D4(1'b0),
         .D5(1'b1), .D6(1'b1), .D7(1'b1), .D8(1'b1), .D9(1'b1),
-        .PCLK(clk), .FCLK(clk_{{mul .ClockFreq 5}}m), .RESET(~lock)
+        .PCLK(clk), .FCLK(clk_{{mul (mhz .ClockFreq) 5}}m), .RESET(~lock)
     );
     defparam oser_clk.GSREN = "false";
     defparam oser_clk.LSREN = "false";
